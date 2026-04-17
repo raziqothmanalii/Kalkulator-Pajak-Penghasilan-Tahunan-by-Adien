@@ -94,7 +94,6 @@
             display: flex; align-items: center; justify-content: center; cursor: pointer;
             transition: 0.2s;
         }
-        .hint:hover { background: var(--accent-blue); }
 
         input {
             width: 100%; padding: 14px; border: 1px solid #444; border-radius: 12px;
@@ -128,15 +127,15 @@
     <div id="guide" class="overlay">
         <div class="modal">
             <h2>Kalkulator Pajak by Adien</h2>
-            <p>Penghitungan PPh 21 menggunakan skema progresif bertingkat. Akurat sesuai regulasi perpajakan terbaru.</p>
+            <p>Penghitungan PPh 21 dengan sistem lapisan progresif. Masukkan data dan tekan <b>Enter</b> untuk hasil instan.</p>
             <button class="btn-prime" onclick="closeM('guide')">Mulai</button>
         </div>
     </div>
 
     <div id="info" class="overlay" style="display: none; opacity: 0;">
         <div class="modal">
-            <h2 style="text-align: left;">Tentang Tanggungan</h2>
-            <p>Tanggungan adalah anggota keluarga (pasangan, anak, orang tua) yang tidak berpenghasilan sendiri. Setiap 1 orang tanggungan akan menambah batas PTKP Anda sebesar Rp 4.500.000/tahun.</p>
+            <h2 style="text-align: left;">Tanggungan</h2>
+            <p>Tanggungan adalah keluarga (pasangan, anak, orang tua) yang menjadi tanggung jawab finansial Anda. Maksimal 3 orang untuk PTKP.</p>
             <button class="btn-prime" onclick="closeM('info')">Tutup</button>
         </div>
     </div>
@@ -164,7 +163,7 @@
 
             <div id="resArea" class="results">
                 <div class="summary-card">
-                    <span style="font-size: 10px; color: var(--text-dim); text-transform: uppercase;">Pajak Tahunan Terutang</span>
+                    <span style="font-size: 10px; color: var(--text-dim); text-transform: uppercase;">Pajak Tahunan</span>
                     <div class="total-val" id="resTahun"></div>
                     <div class="sub-val">± <span id="resBulan"></span> / Bulan</div>
                 </div>
@@ -180,6 +179,14 @@
     </div>
 
     <script>
+        // MENDENGARKAN TOMBOL ENTER DI SELURUH HALAMAN
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Mencegah reload halaman
+                calc();
+            }
+        });
+
         function openM(id) {
             const e = document.getElementById(id);
             e.style.display = 'flex';
@@ -211,7 +218,7 @@
             }
 
             isl.classList.add('island-active');
-            isl.innerText = "DISTRIBUTING LAYERS...";
+            isl.innerText = "CALCULATING...";
 
             setTimeout(() => {
                 const ptkp = 54000000 + (tang * 4500000);
@@ -232,16 +239,10 @@
 
                 for (let lap of lapisan) {
                     if (pkpSisa <= 0) break; 
-
                     let porsi = Math.min(pkpSisa, lap.cap);
                     let pajak = porsi * lap.rate;
-                    
                     totalPajak += pajak;
-                    htmlDetail += `<div class="row">
-                        <span style="color:var(--text-dim)">${lap.label}</span>
-                        <span style="font-weight: 600;">${f(pajak)}</span>
-                    </div>`;
-                    
+                    htmlDetail += `<div class="row"><span style="color:var(--text-dim)">${lap.label}</span><span style="font-weight: 600;">${f(pajak)}</span></div>`;
                     pkpSisa -= porsi;
                 }
 
@@ -251,11 +252,11 @@
                 document.getElementById('resTahun').innerText = f(totalPajak);
                 document.getElementById('resBulan').innerText = f(totalPajak/12);
 
-                isl.innerText = "CALCULATION SUCCESS ✨";
+                isl.innerText = "DONE ✨";
                 setTimeout(() => { isl.classList.remove('island-active'); isl.innerText = "TAX SYSTEM"; }, 1500);
                 
                 document.querySelector('.scroll-content').scrollTo({ top: 400, behavior: 'smooth' });
-            }, 600);
+            }, 500);
         }
     </script>
 </body>
